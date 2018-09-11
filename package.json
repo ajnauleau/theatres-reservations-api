@@ -1,0 +1,32 @@
+{
+  "name": "theatres-reservations-api",
+  "version": "1.0.0",
+  "description": "Theater Reservations API in JavaScript, Express, and MongoDB!",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ajnauleau/theatres-reservations-api.git"
+  },
+  "keywords": [
+    "mongodb",
+    "express",
+    "api",
+    "theatres",
+    "tickets",
+    "reservations"
+  ],
+  "author": "ajnauleau <antoine@nauleau.io>",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ajnauleau/theatres-reservations-api/issues"
+  },
+  "homepage": "https://github.com/ajnauleau/theatres-reservations-api#readme",
+  "dependencies": {
+    "body-parser": "^1.18.3",
+    "express": "^4.16.3",
+    "mongodb": "^3.1.4"
+  }
+}
