@@ -163,8 +163,128 @@ router.get(
     // Failed to reserve seats
     if (result.nModified == 0) {
       console.log('Err failed to reserve seats');
+
+      sessions.update(
+        {
+          _id: 1,
+          $and: [{ 'seats.1.5': 0 }, { 'seats.1.6': 0 }]
+        },
+        {
+          $set: { 'seats.1.5': 1, 'seats.1.6': 1 },
+          $inc: { seatsAvailable: 2 },
+          $push: {
+            reservations: {
+              _id: 1,
+              seats: [[1, 5], [1, 6]],
+              price: 10,
+              total: 20
+            }
+          }
+        }
+      );
+
+      res.redirect('/theaters/:theaterId/sessions/:sessionId/new');
     }
     // Reservation was successful
+    if (result.nModified == 1) {
+      console.log('Reservation was successful for seats');
+    }
+  }
+);
+
+// save seats in session to cart
+router.get(
+  '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/save',
+  function(req, res) {
+    // Test it
+    res.json({
+      stub: `[${req.originalUrl}] Endpoint works!`
+    });
+
+    const sessionId = req.params.sessionId;
+    const cartId = req.params.cartId;
+
+    const seats = [[1, 5], [1, 6]];
+    const seatsQuery = [];
+    const setSeatsSelection = {};
+
+    const sessions = db.collections('sessions');
+    const carts = db.collections('carts');
+    const session = sessions.find({ _id: sessionId });
+
+    const result = carts.update(
+      {
+        _id: cartId
+      },
+      {
+        $push: {
+          reservations: {
+            sessionId: sessionId,
+            seats: seats,
+            price: session.price,
+            total: session.price * seats.length
+          }
+        },
+        $inc: { total: session.price * seats.length },
+        $set: { modifiedOn: new Date() }
+      },
+      (err, result) => {
+        console.log('Saved seats to cart!');
+      }
+    );
+
+    // Failed to reserve seats
+    if (result.nModified == 0) {
+      console.log('Err failed to reserve seats');
+      res.redirect(
+        '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/release'
+      );
+    }
+    // Reservation was successful
+    if (result.nModified == 1) {
+      console.log('Reservation was successful for seats');
+    }
+  }
+);
+
+// release seat reservations from sessions
+router.get(
+  '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/release',
+  function(req, res) {
+    // Test it
+    res.json({
+      stub: `[${req.originalUrl}] Endpoint works!`
+    });
+
+    const sessionId = req.params.sessionId;
+    const cartId = req.params.cartId;
+
+    const seats = [[1, 5], [1, 6]];
+    const setSeatsSelection = {};
+
+    for (let i = 0; i < seats.length; i++) {
+      setSeatsSelection['seats.' + seats[i][0] + '.' + seats[i][1]] = 0;
+    }
+
+    const sessions = db.collections('sessions');
+    const result = sessions.update(
+      {
+        _id: sessionId
+      },
+      {
+        $set: setSeatsSelection,
+        $pull: { reservations: { _id: cartId } }
+      }
+    );
+
+    // Failed to release seats
+    if (result.nModified == 0) {
+      console.log('Err failed to release seats');
+      res.redirect(
+        '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/new'
+      );
+    }
+    // Release of seats was successful
     if (result.nModified == 1) {
       console.log('Reservation was successful for seats');
     }
