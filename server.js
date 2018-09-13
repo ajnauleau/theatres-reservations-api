@@ -30,6 +30,7 @@ const dbName = 'theatres';
 // Init db global
 let db = {};
 
+// Mongodb connect
 MongoClient.connect(
   url,
   { useNewUrlParser: true },
@@ -51,7 +52,7 @@ MongoClient.connect(
       });
     }
 
-    client.close();
+    //client.close();
   }
 );
 
