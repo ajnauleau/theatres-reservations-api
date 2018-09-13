@@ -82,10 +82,10 @@ carts;
 app.use('/', router);
 
 // insert new session
-router.get('/theaters/:theaterId/:theaterName/new', function(req, res) {
+router.get('/theaters/:theaterId/sessions/:sessionId/new', function(req, res) {
   // Test it
   res.json({
-    stub: `[${req.originalUrl}] Endpoint works! Replace me in Step 2.`
+    stub: `[${req.originalUrl}] Endpoint works!`
   });
 
   const theaterId = req.params.theaterId;
@@ -94,7 +94,7 @@ router.get('/theaters/:theaterId/:theaterName/new', function(req, res) {
   let theater = theaters.findOne({ _id: theaterId });
   sessions.insertOne(
     {
-      name: req.params.theaterName,
+      name: 'Action Bronson',
       description: 'Another action movie',
       start: new Date('2015-03-11T15:00:00.000Z').toISOString(),
       end: new Date('2015-03-11T16:00:00.000Z').toISOString(),
@@ -104,10 +104,72 @@ router.get('/theaters/:theaterId/:theaterName/new', function(req, res) {
       reservations: []
     },
     (err, result) => {
-      console.log('Inserted new theater!');
+      console.log('Inserted new session!');
     }
   );
 });
+
+// reserve seats on session
+router.get(
+  '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/new',
+  function(req, res) {
+    // Test it
+    res.json({
+      stub: `[${req.originalUrl}] Endpoint works!`
+    });
+
+    const sessionId = req.params.sessionId;
+    const cartId = req.params.cartId;
+
+    const seats = [[1, 5], [1, 6]];
+    const seatsQuery = [];
+    const setSeatsSelection = {};
+
+    const sessions = db.collections('sessions');
+    const session = sessions.find({ _id: sessionId });
+
+    for (let i = 0; i < seats.length; i++) {
+      let seatSelector = {};
+      let seatSelection = 'seats.' + seats[i][0] + '.' + seats[i][1];
+      // Part of $and query to check if seat is free
+      seatSelector[seatSelection] = 0;
+      seatsQuery.push(seatSelector);
+      // Part of $set operation to set seat as occupied
+      setSeatsSelection[seatSelection] = 1;
+    }
+
+    const result = sessions.update(
+      {
+        _id: sessionId,
+        $and: seatsQuery
+      },
+      {
+        $set: setSeatsSelection,
+        $inc: { seatsAvailable: -seats.length },
+        $push: {
+          reservations: {
+            _id: cartId,
+            seats: seats,
+            price: session.price,
+            total: session.price * seats.length
+          }
+        }
+      },
+      (err, result) => {
+        console.log('Updated new cart!');
+      }
+    );
+
+    // Failed to reserve seats
+    if (result.nModified == 0) {
+      console.log('Err failed to reserve seats');
+    }
+    // Reservation was successful
+    if (result.nModified == 1) {
+      console.log('Reservation was successful for seats');
+    }
+  }
+);
 
 // theatres index - show all theatres
 app
