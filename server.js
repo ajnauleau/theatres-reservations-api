@@ -92,19 +92,19 @@ router.get('/theaters/:theaterId/:theaterName/new', function(req, res) {
   const theaters = db.collection('theaters');
   const sessions = db.collection('sessions');
   let theater = theaters.findOne({ _id: theaterId });
-  sessions.insert(
+  sessions.insertOne(
     {
       name: req.params.theaterName,
       description: 'Another action movie',
-      start: ISODate('2015-03-11T15:00:00.000Z'),
-      end: ISODate('2015-03-11T16:00:00.000Z'),
+      start: new Date('2015-03-11T15:00:00.000Z').toISOString(),
+      end: new Date('2015-03-11T16:00:00.000Z').toISOString(),
       price: 10,
       seatsAvailable: theater.seatsAvailable,
       seats: theater.seats,
       reservations: []
     },
     (err, result) => {
-      console.log('Inserted theaters!');
+      console.log('Inserted new theater!');
     }
   );
 });
