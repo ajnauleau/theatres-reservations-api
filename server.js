@@ -125,7 +125,7 @@ router.get(
     const seatsQuery = [];
     const setSeatsSelection = {};
 
-    const sessions = db.collections('sessions');
+    const sessions = db.collection('sessions');
     const session = sessions.find({ _id: sessionId });
 
     for (let i = 0; i < seats.length; i++) {
@@ -208,8 +208,8 @@ router.get(
     const seatsQuery = [];
     const setSeatsSelection = {};
 
-    const sessions = db.collections('sessions');
-    const carts = db.collections('carts');
+    const sessions = db.collection('sessions');
+    const carts = db.collection('carts');
     const session = sessions.find({ _id: sessionId });
 
     const result = carts.update(
@@ -266,7 +266,54 @@ router.get(
       setSeatsSelection['seats.' + seats[i][0] + '.' + seats[i][1]] = 0;
     }
 
-    const sessions = db.collections('sessions');
+    const sessions = db.collection('sessions');
+    const result = sessions.update(
+      {
+        _id: sessionId
+      },
+      {
+        $set: setSeatsSelection,
+        $pull: { reservations: { _id: cartId } }
+      }
+    );
+
+    // Failed to release seats
+    if (result.nModified == 0) {
+      console.log('Err failed to release seats');
+      res.redirect(
+        '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/new'
+      );
+    }
+    // Release of seats was successful
+    if (result.nModified == 1) {
+      console.log('Reservation was successful for seats');
+    }
+  }
+);
+
+// checkout cart and make receipt
+router.get(
+  '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/receipts/:receiptId/new',
+  function(req, res) {
+    // Test it
+    res.json({
+      stub: `[${req.originalUrl}] Endpoint works!`
+    });
+
+    const cartId = req.params.cartId;
+
+    const carts = db.collection('carts');
+    const receipts = db.getSisterDB('booking').receipts;
+
+    const cart = carts.findOne({ _id: cartId });
+
+    receipts.insert({
+      createdOn: new Date(),
+      reservations: cart.reservations,
+      total: cart.total
+    });
+
+    const sessions = db.collection('sessions');
     const result = sessions.update(
       {
         _id: sessionId
