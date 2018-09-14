@@ -138,7 +138,7 @@ router.get(
       setSeatsSelection[seatSelection] = 1;
     }
 
-    const result = sessions.update(
+    const result = sessions.updateMany(
       {
         _id: sessionId,
         $and: seatsQuery
@@ -159,12 +159,12 @@ router.get(
         console.log('Updated new cart!');
       }
     );
-
+    console.log(result);
     // Failed to reserve seats
     if (result.nModified == 0) {
       console.log('Err failed to reserve seats');
 
-      sessions.update(
+      sessions.updateMany(
         {
           _id: 1,
           $and: [{ 'seats.1.5': 0 }, { 'seats.1.6': 0 }]
@@ -212,7 +212,7 @@ router.get(
     const carts = db.collection('carts');
     const session = sessions.find({ _id: sessionId });
 
-    const result = carts.update(
+    const result = carts.updateMany(
       {
         _id: cartId
       },
@@ -267,7 +267,7 @@ router.get(
     }
 
     const sessions = db.collection('sessions');
-    const result = sessions.update(
+    const result = sessions.updateMany(
       {
         _id: sessionId
       },
@@ -307,7 +307,7 @@ router.get(
 
     const cart = carts.findOne({ _id: cartId });
 
-    receipts.insert({
+    receipts.insertMany({
       createdOn: new Date(),
       reservations: cart.reservations,
       total: cart.total
@@ -316,20 +316,19 @@ router.get(
     // remove reservations in cart from sessions
     const sessions = db.collection('sessions');
 
-    sessions.update(
+    sessions.updateMany(
       {
         'reservations._id': cartId
       },
       {
-        $pull: { reservations: { _id: id } }
+        $pull: { reservations: { _id: cartId } }
       },
       false,
       true
     );
 
     // mark cart as done
-    const carts = db.collection('carts');
-    carts.update(
+    carts.updateMany(
       {
         _id: cartId
       },
@@ -375,7 +374,7 @@ router.get(
         }
 
         // Release seats and remove reservation
-        sessionsCol.update(
+        sessionsCol.updateMany(
           {
             _id: reservation._id
           },
@@ -387,7 +386,7 @@ router.get(
       }
 
       // Set the cart to expired
-      cartsCol.update(
+      cartsCol.updateMany(
         {
           _id: cart._id
         },
