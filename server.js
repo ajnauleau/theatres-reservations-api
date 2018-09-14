@@ -247,7 +247,7 @@ router.get(
   }
 );
 
-// release seat reservations from sessions
+// release seat reservations from sessions in cart
 router.get(
   '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/release',
   function(req, res) {
@@ -303,7 +303,7 @@ router.get(
     const cartId = req.params.cartId;
 
     const carts = db.collection('carts');
-    const receipts = db.getSisterDB('booking').receipts;
+    const receipts = db.collection('receipts');
 
     const cart = carts.findOne({ _id: cartId });
 
@@ -313,27 +313,88 @@ router.get(
       total: cart.total
     });
 
+    // remove reservations in cart from sessions
     const sessions = db.collection('sessions');
-    const result = sessions.update(
+
+    sessions.update(
       {
-        _id: sessionId
+        'reservations._id': cartId
       },
       {
-        $set: setSeatsSelection,
-        $pull: { reservations: { _id: cartId } }
-      }
+        $pull: { reservations: { _id: id } }
+      },
+      false,
+      true
     );
 
-    // Failed to release seats
-    if (result.nModified == 0) {
-      console.log('Err failed to release seats');
-      res.redirect(
-        '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/new'
+    // mark cart as done
+    const carts = db.collection('carts');
+    carts.update(
+      {
+        _id: cartId
+      },
+      {
+        $set: { state: 'done' }
+      }
+    );
+  }
+);
+
+// cart expires so release reservations
+router.get(
+  '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/expires',
+  function(req, res) {
+    // Test it
+    res.json({
+      stub: `[${req.originalUrl}] Endpoint works!`
+    });
+
+    let cutOffDate = new Date();
+    cutOffDate.setMinutes(cutOffDate.getMinutes() - 30);
+
+    const cartsCol = db.collection('carts');
+    const sessionsCol = db.collection('sessions');
+
+    const carts = cartsCol.find({
+      modifiedOn: { $lte: cutOffDate },
+      state: 'active'
+    });
+
+    // Process all carts
+    while (carts.hasNext()) {
+      let cart = carts.next();
+
+      // Process all reservations in the cart
+      for (let i = 0; i < cart.reservations.length; i++) {
+        let reservation = cart.reservations[i];
+        let seats = reservation.seats;
+        let setSeatsSelection = {};
+
+        for (let i = 0; i < seats.length; i++) {
+          setSeatsSelection['seats.' + seats[i][0] + '.' + seats[i][1]] = 0;
+        }
+
+        // Release seats and remove reservation
+        sessionsCol.update(
+          {
+            _id: reservation._id
+          },
+          {
+            $set: setSeatsSelection,
+            $pull: { reservations: { _id: cart._id } }
+          }
+        );
+      }
+
+      // Set the cart to expired
+      cartsCol.update(
+        {
+          _id: cart._id
+        },
+        {
+          $set: { status: 'expired' }
+        }
       );
-    }
-    // Release of seats was successful
-    if (result.nModified == 1) {
-      console.log('Reservation was successful for seats');
     }
   }
 );
