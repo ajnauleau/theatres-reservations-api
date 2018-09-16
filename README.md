@@ -1,4 +1,4 @@
-# Theater Reservations API - Persisting Reservations Waiting to be Called On
+# Theater Reservations API - Persistant Reservations Waiting to be Called On
  ... written in JavaScript, Express, and MongoDB!
 
 
@@ -12,7 +12,7 @@ There is much resemblence for shopping cart for reservations e-commerce API, but
 
 ## How to Use This API
 
-Any of the follow root level routes will return all of the items for that route call's subject:
+Any of the follow root level routes will return all of the items for that route directory call's subject:
 
 `'/theatres': All of the theatres in the database`
 `'/sessions': All of the sessions for theatres in the database`
@@ -29,14 +29,26 @@ Here's an example of a call to purchase tickets and get a *receipt* at the the t
 
 ```sh
 $ nodemon
-$[nodemon] restarting due to changes...
-$[nodemon] starting `node server.js`
+$ [nodemon] restarting due to changes...
+$ [nodemon] starting `node server.js`
 
 $ curl 'localhost:3000/theatres/1/sessions/3/carts/1/receipts/327/new'
 $ ... 
 $ {"stub":"[/theaters/1/sessions/1/carts/1/receipts/1/new] Endpoint works!"}%
 
 ```
+
+Each subject directory of the route has a few different end points:
+
+`'/theatres/theatresId/sessions/sessionId/'`
+
+`'/theatres/theatresId/sessions/sessionId/carts/cartId/'` {new/release}
+
+`'/theatres/theatresId/sessions/sessionId/carts/cartId/'` {new/release/expires}
+
+`'/theatres/theatresId/sessions/sessionId/carts/cartId/receipts/receiptId/'` {new/release/save/expires}
+
+
 [**TODO**] nested routes? html post form?
 
 ## What I Learned
