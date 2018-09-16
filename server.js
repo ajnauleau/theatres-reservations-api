@@ -104,7 +104,7 @@ router.get('/theaters/:theaterId/sessions/:sessionId/new', function(req, res) {
       reservations: []
     },
     (err, result) => {
-      console.log('Inserted new session!');
+      console.log('Inserted new session! STDOUT: ' + result);
     }
   );
 });
@@ -138,7 +138,7 @@ router.get(
       setSeatsSelection[seatSelection] = 1;
     }
 
-    const result = sessions.updateMany(
+    const result = sessions.updateOne(
       {
         _id: sessionId,
         $and: seatsQuery
@@ -156,12 +156,12 @@ router.get(
         }
       },
       (err, result) => {
-        console.log('Updated new cart!');
+        console.log('Updated new cart! STOUT: ' + result);
       }
     );
-    console.log(result);
     // Failed to reserve seats
-    if (result.nModified == 0) {
+    if (result === 0) {
+      //.result.nModified == 0
       console.log('Err failed to reserve seats');
 
       sessions.updateMany(
@@ -186,7 +186,8 @@ router.get(
       res.redirect('/theaters/:theaterId/sessions/:sessionId/new');
     }
     // Reservation was successful
-    if (result.nModified == 1) {
+    if (result === 1) {
+      //.result.nModified == 1
       console.log('Reservation was successful for seats');
     }
   }
@@ -229,19 +230,21 @@ router.get(
         $set: { modifiedOn: new Date() }
       },
       (err, result) => {
-        console.log('Saved seats to cart!');
+        console.log('Saved seats to cart! STDOUT: ' + result);
       }
     );
 
     // Failed to reserve seats
-    if (result.nModified == 0) {
+    if (result === 0) {
+      //.result.nModified == 0
       console.log('Err failed to reserve seats');
       res.redirect(
         '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/release'
       );
     }
     // Reservation was successful
-    if (result.nModified == 1) {
+    if (result === 1) {
+      //result.nModified == 1
       console.log('Reservation was successful for seats');
     }
   }
@@ -267,27 +270,33 @@ router.get(
     }
 
     const sessions = db.collection('sessions');
-    const result = sessions.updateMany(
+    sessions.updateMany(
       {
         _id: sessionId
       },
       {
         $set: setSeatsSelection,
         $pull: { reservations: { _id: cartId } }
+      },
+      (err, result) => {
+        // Get results
+        console.log('Release seats from cart! STDOUT: ' + result);
+
+        // Failed to release seats
+        if (result.nModified === 0) {
+          //result.nModified == 0
+          console.log('Err failed to release seats');
+          res.redirect(
+            '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/new'
+          );
+        }
+        // Release of seats was successful
+        if (result.nModified === 1) {
+          //result.nModified == 1
+          console.log('Reservation was successful for seats');
+        }
       }
     );
-
-    // Failed to release seats
-    if (result.nModified == 0) {
-      console.log('Err failed to release seats');
-      res.redirect(
-        '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/new'
-      );
-    }
-    // Release of seats was successful
-    if (result.nModified == 1) {
-      console.log('Reservation was successful for seats');
-    }
   }
 );
 
@@ -307,7 +316,7 @@ router.get(
 
     const cart = carts.findOne({ _id: cartId });
 
-    receipts.insertMany({
+    receipts.insertOne({
       createdOn: new Date(),
       reservations: cart.reservations,
       total: cart.total
@@ -316,24 +325,30 @@ router.get(
     // remove reservations in cart from sessions
     const sessions = db.collection('sessions');
 
-    sessions.updateMany(
+    sessions.updateOne(
       {
         'reservations._id': cartId
       },
       {
         $pull: { reservations: { _id: cartId } }
-      },
-      false,
-      true
+      }, //false, true
+      (err, result) => {
+        console.log(
+          'Remove persistent reservations in sessions! STDOUT: ' + result
+        );
+      }
     );
 
     // mark cart as done
-    carts.updateMany(
+    carts.updateOne(
       {
         _id: cartId
       },
       {
         $set: { state: 'done' }
+      },
+      (err, result) => {
+        console.log('Mark cart as done! STDOUT: ' + result);
       }
     );
   }
@@ -363,27 +378,29 @@ router.get(
     while (carts.hasNext()) {
       let cart = carts.next();
 
-      // Process all reservations in the cart
-      for (let i = 0; i < cart.reservations.length; i++) {
-        let reservation = cart.reservations[i];
-        let seats = reservation.seats;
-        let setSeatsSelection = {};
+      cart.then(function(cart) {
+        // Process all reservations in the cart
+        for (let i = 0; i < cart.reservations.length; i++) {
+          let reservation = cart.reservations[i];
+          let seats = reservation.seats;
+          let setSeatsSelection = {};
 
-        for (let i = 0; i < seats.length; i++) {
-          setSeatsSelection['seats.' + seats[i][0] + '.' + seats[i][1]] = 0;
-        }
-
-        // Release seats and remove reservation
-        sessionsCol.updateMany(
-          {
-            _id: reservation._id
-          },
-          {
-            $set: setSeatsSelection,
-            $pull: { reservations: { _id: cart._id } }
+          for (let i = 0; i < seats.length; i++) {
+            setSeatsSelection['seats.' + seats[i][0] + '.' + seats[i][1]] = 0;
           }
-        );
-      }
+
+          // Release seats and remove reservation
+          sessionsCol.updateMany(
+            {
+              _id: reservation._id
+            },
+            {
+              $set: setSeatsSelection,
+              $pull: { reservations: { _id: cart._id } }
+            }
+          );
+        }
+      });
 
       // Set the cart to expired
       cartsCol.updateMany(
@@ -450,45 +467,57 @@ app
         }
       ],
       (err, result) => {
-        console.log('Inserted theaters!');
+        console.log('Inserted theaters! STDOUT: ' + result);
       }
     );
   });
 
 app
-  .route('/sessions/:sessionId/')
+  .route('/sessions/')
   .get(function(req, res) {
-    res.send('Get a session: ' + req.params.session);
+    const collection = db.collection('sessions');
+
+    // Find some documents
+    collection.find({}).toArray(function(err, docs) {
+      assert.equal(err, null);
+      res.json(docs);
+    });
+    // res.send('Get a session: ' + req.params.session);
   })
   .post(function(req, res) {
     res.send('Post a session: ' + req.params.session);
   });
 
 app
-  .route('/reserves/:reserveId/')
+  .route('/carts/')
   .get(function(req, res) {
-    res.send('Get a session: ' + req.params.reserve);
+    const collection = db.collection('carts');
+
+    // Find some documents
+    collection.find({}).toArray(function(err, docs) {
+      assert.equal(err, null);
+      res.json(docs);
+    });
+    //res.send('Get a cart: ' + req.params.cart);
   })
   .post(function(req, res) {
-    res.send('Post a session: ' + req.params.reserve);
+    res.send('Post a cart: ' + req.params.cart);
   });
 
 app
-  .route('/carts/:cartId/')
+  .route('/receipts/')
   .get(function(req, res) {
-    res.send('Get a session: ' + req.params.cart);
-  })
-  .post(function(req, res) {
-    res.send('Post a session: ' + req.params.cart);
-  });
+    const collection = db.collection('receipts');
 
-app
-  .route('/receipts/:receiptId/')
-  .get(function(req, res) {
-    res.send('Get a session: ' + req.params.receipt);
+    // Find some documents
+    collection.find({}).toArray(function(err, docs) {
+      assert.equal(err, null);
+      res.json(docs);
+    });
+    //res.send('Get a receipt: ' + req.params.receipt);
   })
   .post(function(req, res) {
-    res.send('Post a session: ' + req.params.receipt);
+    res.send('Post a receipt: ' + req.params.receipt);
   });
 
 module.exports = router;
