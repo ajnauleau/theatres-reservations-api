@@ -2,6 +2,7 @@
 
 ... written in JavaScript, Express, and MongoDB!
 
+
 ## Purpose
 
 This API and its schema pattern were built around the concept of buying and selling tickets for any concert, theatres, or venue type of organisation.
@@ -9,6 +10,7 @@ This API and its schema pattern were built around the concept of buying and sell
 It's a reservation-based schema where the user can pick their own seats and theater session, and the seats are reserved until the user either checks out the cart or the cart expires.
 
 There is much resemblence for shopping cart for reservations e-commerce API, but with some unique differences which make it beneficial to understand and implement in your own project.
+
 
 ## How to Use This API
 
@@ -21,6 +23,7 @@ Any of the follow root level routes will return all of the items for that route 
 `'/carts': All of the shopping carts stored in the database (current & reserved)`
 
 `'/receipts': All the receipts from successful checkouts in the database`
+
 
 ## Routes
 
@@ -38,13 +41,9 @@ $ [nodemon] starting `node server.js`
 $ curl 'localhost:3000/theatres/1/sessions/3/carts/1/receipts/327/new'
 $ ...
 $ {"stub":"[/theaters/1/sessions/1/carts/1/receipts/1/new] Endpoint works!"}%
-<<<<<<< HEAD
+$ Inserted new receipt!
 ```
 
-=======
-$ Inserted new receipt!
-
-````
 Otherwise you can call the end point at its `'subjectId'` and get this specific document your are looking for by its Id number:
 
 ```sh
@@ -54,8 +53,7 @@ $ [nodemon] starting `node server.js`
 
 $ curl 'http://localhost:3000/theaters/2/sessions/1/carts/1/receipts/1/'
 $ ...
-````
-
+```
 returns ...
 
 ```JSON
@@ -64,7 +62,7 @@ returns ...
 
 Each subject directory of the route has a `'new'` end point which will create a new document for that subject:
 
-\*_!cartId has multiple state end points, in order to either `'save'` to save the cart, `'release'` to release the cart after making the purchase/exiting the screen, and `'expires'` in case the user times out and the cart expires_
+*_!cartId has multiple state end points, in order to either `'save'` to save the cart, `'release'` to release the cart after making the purchase/exiting the screen, and `'expires'` in case the user times out and the cart expires_
 
 `'/theatres/theatresId/sessions/sessionId/'` {new}
 
@@ -73,6 +71,7 @@ Each subject directory of the route has a `'new'` end point which will create a 
 `'/theatres/theatresId/sessions/sessionId/carts/cartId/receipts/receiptId/'` {new}
 
 [**TODO**] nested routes? html post form?
+
 
 ## What I Learned
 
