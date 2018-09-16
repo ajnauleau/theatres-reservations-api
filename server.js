@@ -367,7 +367,9 @@ router.get(
     cutOffDate.setMinutes(cutOffDate.getMinutes() - 30);
 
     const cartsCol = db.collection('carts');
+    cartsCol.createIndexes({ state: 1 });
     const sessionsCol = db.collection('sessions');
+    sessionsCol.createIndexes({ 'reservations._id': 1 });
 
     const carts = cartsCol.find({
       modifiedOn: { $lte: cutOffDate },
@@ -378,7 +380,8 @@ router.get(
     while (carts.hasNext()) {
       let cart = carts.next();
 
-      cart.then(function(cart) {
+      // !Fix un resolved pending promise
+      if (cart !== undefined) {
         // Process all reservations in the cart
         for (let i = 0; i < cart.reservations.length; i++) {
           let reservation = cart.reservations[i];
@@ -400,17 +403,19 @@ router.get(
             }
           );
         }
-      });
 
-      // Set the cart to expired
-      cartsCol.updateMany(
-        {
-          _id: cart._id
-        },
-        {
-          $set: { status: 'expired' }
-        }
-      );
+        // Set the cart to expired
+        cartsCol.updateMany(
+          {
+            _id: cart._id
+          },
+          {
+            $set: { status: 'expired' }
+          }
+        );
+      } else {
+        console.log('Err carts not full, nothing to expire.');
+      }
     }
   }
 );
