@@ -10,6 +10,7 @@ It's a reservation-based schema where the user can pick their own seats and thea
 
 There is much resemblence for shopping cart for reservations e-commerce API, but with some unique differences which make it beneficial to understand and implement in your own project.
 
+
 ## How to Use This API
 
 Any of the follow root level routes will return all of the items for that route directory call's subject:
@@ -21,6 +22,7 @@ Any of the follow root level routes will return all of the items for that route 
 `'/carts': All of the shopping carts stored in the database (current & reserved)`
 
 `'/receipts': All the receipts from successful checkouts in the database`
+
 
 ## Routes
 
@@ -51,14 +53,15 @@ $ [nodemon] starting `node server.js`
 
 $ curl 'http://localhost:3000/theaters/2/sessions/1/carts/1/receipts/1/'
 $ ... 
-$ ```JSON
-[{"_id":2,"name":"The Gorilla","seats":[[0,0,0],[0,0,0,0,0]],"seatsAvailable":8},null,null,[]]%   ```
-
 ```
+```JSON
+[{"_id":2,"name":"The Gorilla","seats":[[0,0,0],[0,0,0,0,0]],"seatsAvailable":8},null,null,[]]% 
+```
+
 
 Each subject directory of the route has a `'new'` end point which will create a new document for that subject:
 
-_ - !the cartId have multiple state end points to either `'save'` to save the cart, `'release'` to release the cart after making the purchase or exiting the screen, and `'expires'` in case the user times out and the cart expires _
+*_!the cartId have multiple state end points to either `'save'` to save the cart, `'release'` to release the cart after making the purchase or exiting the screen, and `'expires'` in case the user times out and the cart expires_
 
 `'/theatres/theatresId/sessions/sessionId/'` {new}
 
@@ -68,6 +71,7 @@ _ - !the cartId have multiple state end points to either `'save'` to save the ca
 
 
 [**TODO**] nested routes? html post form?
+
 
 ## What I Learned
 
