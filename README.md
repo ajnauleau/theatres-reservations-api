@@ -1,14 +1,4 @@
-<<<<<<< HEAD
-
-# Theater Reservations API - Persisting Reservations Waiting to be Called On
-
-=======
-
 # Theater Reservations API - Persistant Reservations Waiting to be Called On
-
-... written in JavaScript, Express, and MongoDB!
-
-> > > > > > > 5071efce0ddc09709cabe8ce1951792a31102e71
 
 ... written in JavaScript, Express, and MongoDB!
 
@@ -82,7 +72,7 @@ Each subject directory of the route has a `'new'` end point which will create a 
 
 `'/theatres/theatresId/sessions/sessionId/carts/cartId/receipts/receiptId/'` {new}
 
-> > > > > > > [**TODO**] nested routes? html post form?
+[**TODO**] nested routes? html post form?
 
 ## What I Learned
 
