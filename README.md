@@ -1,6 +1,6 @@
 # Theater Reservations API - Persisting Reservations Waiting to be Called On
- ... written in JavaScript, Express, and MongoDB!
 
+... written in JavaScript, Express, and MongoDB!
 
 ## Purpose
 
@@ -25,7 +25,7 @@ In order to find a certain theatres information, such as the receipt for a purch
 
 `'/theatres/theatresId/sessions/sessionId/carts/cartId/receipts/receiptId': Where each 'subjectId' is an integer`
 
-Here's an example of a call to purchase tickets and get a *receipt* at the the theatre `'The Royal'` which is the first document in the database:
+Here's an example of a call to purchase tickets and get a _receipt_ at the the theatre `'The Royal'` which is the first document in the database:
 
 ```sh
 $ nodemon
@@ -33,15 +33,15 @@ $[nodemon] restarting due to changes...
 $[nodemon] starting `node server.js`
 
 $ curl 'localhost:3000/theatres/1/sessions/3/carts/1/receipts/327/new'
-$ ... 
+$ ...
 $ {"stub":"[/theaters/1/sessions/1/carts/1/receipts/1/new] Endpoint works!"}%
-
 ```
+
 [**TODO**] nested routes? html post form?
 
 ## What I Learned
 
-- Buiding the theater-reservations-api was an exercise which had me break down each individual step of making, breaking, and calling an API made in Nodejs with Express. 
+- Buiding the theater-reservations-api was an exercise which had me break down each individual step of making, breaking, and calling an API made in Nodejs with Express.
 
 - This atypical use of MongoDB and NOT Mongoose showed me the true underlyings of this nosql database, and although I ran into headaches, I came out with a better global understanding of how to internact with MongoDB on a lower-level.
 

@@ -78,6 +78,83 @@ carts;
 
 */
 
+// THEATERS ID INDEX - show the theater for an id in a theater
+app.get('/theaters/:theaterId', (req, res) => {
+  db.collection('theaters')
+    .find({ _id: parseInt(req.params.theaterId) })
+    .toArray(function(err, docs) {
+      assert.equal(err, null);
+      db.collection('sessions')
+        .find({ theaterId: parseInt(req.params.theaterId) })
+        .toArray((error, documents) => {
+          res.json([docs[0], documents]);
+        });
+    });
+});
+
+// SHOWINGS ID INDEX - show the session for an id in a theatre
+app.get('/theaters/:theaterId/sessions/:sessionId/', (req, res) => {
+  db.collection('theaters')
+    .find({ _id: parseInt(req.params.theaterId) })
+    .toArray(function(err, docs) {
+      assert.equal(err, null);
+      db.collection('sessions')
+        .find({ sessionId: parseInt(req.params.sessionId) })
+        .toArray((error, documents) => {
+          res.json([docs[0], documents]);
+        });
+    });
+});
+
+// CARTS ID INDEX - Show the cart for and id in a theater
+app.get(
+  '/theaters/:theaterId/sessions/:sessionId/carts/:cartId',
+  (req, res) => {
+    db.collection('theaters')
+      .find({ _id: parseInt(req.params.theaterId) })
+      .toArray(function(err, docs) {
+        assert.equal(err, null);
+        db.collection('sessions')
+          .find({ sessionId: parseInt(req.params.sessionId) })
+          .toArray((error, sessions) => {
+            assert.equal(err, null);
+            db.collection('carts')
+              .find({ cartId: parseInt(req.params.cartId) })
+              .toArray((error, carts) => {
+                res.json([docs[0], sessions[0], carts]);
+              });
+          });
+      });
+  }
+);
+
+// RECEIPTS ID INDEX - Show the receipt for an id in a theater
+app.get(
+  '/theaters/:theaterId/sessions/:sessionId/carts/:cartId/receipts/:receiptId',
+  (req, res) => {
+    db.collection('theaters')
+      .find({ _id: parseInt(req.params.theaterId) })
+      .toArray(function(err, docs) {
+        assert.equal(err, null);
+        db.collection('sessions')
+          .find({ sessionId: parseInt(req.params.sessionId) })
+          .toArray((error, sessions) => {
+            assert.equal(err, null);
+            db.collection('carts')
+              .find({ cartId: parseInt(req.params.cartId) })
+              .toArray((error, carts) => {
+                assert.equal(err, null);
+                db.collection('receipts')
+                  .find({ receiptId: parseInt(req.params.receiptId) })
+                  .toArray((error, receipts) => {
+                    res.json([docs[0], sessions[0], carts[0], receipts]);
+                  });
+              });
+          });
+      });
+  }
+);
+
 // routes
 app.use('/', router);
 
