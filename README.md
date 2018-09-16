@@ -54,6 +54,8 @@ $ [nodemon] starting `node server.js`
 $ curl 'http://localhost:3000/theaters/2/sessions/1/carts/1/receipts/1/'
 $ ... 
 ```
+returns ...
+
 ```JSON
 [{"_id":2,"name":"The Gorilla","seats":[[0,0,0],[0,0,0,0,0]],"seatsAvailable":8},null,null,[]]% 
 ```
@@ -61,14 +63,13 @@ $ ...
 
 Each subject directory of the route has a `'new'` end point which will create a new document for that subject:
 
-*_!the cartId have multiple state end points to either `'save'` to save the cart, `'release'` to release the cart after making the purchase or exiting the screen, and `'expires'` in case the user times out and the cart expires_
+*_!cartId has multiple state end points, inorder to either `'save'` to save the cart, `'release'` to release the cart after making the purchase/exiting the screen, and `'expires'` in case the user times out and the cart expires_
 
 `'/theatres/theatresId/sessions/sessionId/'` {new}
 
 `'/theatres/theatresId/sessions/sessionId/carts/cartId/'` {new/save/release/expires}
 
 `'/theatres/theatresId/sessions/sessionId/carts/cartId/receipts/receiptId/'` {new}
-
 
 [**TODO**] nested routes? html post form?
 
