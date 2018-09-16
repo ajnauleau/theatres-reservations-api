@@ -15,8 +15,11 @@ There is much resemblence for shopping cart for reservations e-commerce API, but
 Any of the follow root level routes will return all of the items for that route directory call's subject:
 
 `'/theatres': All of the theatres in the database`
+
 `'/sessions': All of the sessions for theatres in the database`
+
 `'/carts': All of the shopping carts stored in the database (current & reserved)`
+
 `'/receipts': All the receipts from successful checkouts in the database`
 
 ## Routes
@@ -35,18 +38,33 @@ $ [nodemon] starting `node server.js`
 $ curl 'localhost:3000/theatres/1/sessions/3/carts/1/receipts/327/new'
 $ ... 
 $ {"stub":"[/theaters/1/sessions/1/carts/1/receipts/1/new] Endpoint works!"}%
+$ Inserted new receipt!
 
 ```
 
-Each subject directory of the route has a few different end points:
+Otherwise you can call the end point at its `'subjectId'` and get this specific document your are looking for by its Id number:
 
-`'/theatres/theatresId/sessions/sessionId/'`
+```sh
+$ nodemon
+$ [nodemon] restarting due to changes...
+$ [nodemon] starting `node server.js`
 
-`'/theatres/theatresId/sessions/sessionId/carts/cartId/'` {new/release}
+$ curl 'http://localhost:3000/theaters/2/sessions/1/carts/1/receipts/1/'
+$ ... 
+$ ```JSON
+[{"_id":2,"name":"The Gorilla","seats":[[0,0,0],[0,0,0,0,0]],"seatsAvailable":8},null,null,[]]%   ```
 
-`'/theatres/theatresId/sessions/sessionId/carts/cartId/'` {new/release/expires}
+```
 
-`'/theatres/theatresId/sessions/sessionId/carts/cartId/receipts/receiptId/'` {new/release/save/expires}
+Each subject directory of the route has a `'new'` end point which will create a new document for that subject:
+
+_ - !the cartId have multiple state end points to either `'save'` to save the cart, `'release'` to release the cart after making the purchase or exiting the screen, and `'expires'` in case the user times out and the cart expires _
+
+`'/theatres/theatresId/sessions/sessionId/'` {new}
+
+`'/theatres/theatresId/sessions/sessionId/carts/cartId/'` {new/save/release/expires}
+
+`'/theatres/theatresId/sessions/sessionId/carts/cartId/receipts/receiptId/'` {new}
 
 
 [**TODO**] nested routes? html post form?
